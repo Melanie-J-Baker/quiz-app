@@ -86,7 +86,7 @@ $(document).ready(() => {
     function showScore() {
         resetState();
         $questionElement.html(`You scored ${score} out of ${questions.length}!`);
-        $nextButton.htm("Play Again");
+        $nextButton.html("Play Again");
         $nextButton.css("display", "block");
     }
 
