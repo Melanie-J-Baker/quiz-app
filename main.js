@@ -1,63 +1,75 @@
 $(document).ready(() => {
-    const questions = [
-        {
-            question: "Which is the largest animal in the world?",
-            answers: [
-                { text: "Shark", correct: false},
-                { text: "Blue whale", correct: true},
-                { text: "Elephant", correct: false},
-                { text: "Giraffe", correct: false},
-            ]
-        },
-            {
-            question: "Which is the largest desert in the world?",
-            answers: [
-                { text: "Kalahari", correct: false},
-                { text: "Gobi", correct: false},
-                { text: "Sahara", correct: false},
-                { text: "Antarctica", correct: true},
-            ]
-        },
-            {
-            question: "Which is the smallest continent in the world?",
-            answers: [
-                { text: "Asia", correct: false},
-                { text: "Australia", correct: true},
-                { text: "Arctic", correct: false},
-                { text: "Africa", correct: false},
-            ]
-        }
-    ];
-
+    let questions = [];
     let currentQuestionIndex = 0;
     let score = 0;
+    let levels = ["easy", "medium", "hard"];
 
     const $questionElement = $("#question");
     const $answerButtons = $("#answer-buttons");
     const $nextButton = $("#next-btn");
+    const $quizDiv = $(".quiz");
+    const $selectLevel = $(".select-level");
 
-    function startQuiz() {
+    levels.forEach(level => {
+        const $levelButton = $("<button></button>")
+            .text(level)
+            .addClass("level-btn btn")
+        $levelButton.on("click", () => startQuiz(level))
+        $selectLevel.append($levelButton);
+    })
+
+    function startQuiz(level) {
+        $selectLevel.hide();
+        $quizDiv.show();
         currentQuestionIndex = 0;
         score = 0;
         $nextButton.html("Next");
-        showQuestion();
+        fetchQuestions(level);
     };
+
+    function fetchQuestions(level) {
+        fetch("https://the-trivia-api.com/v2/questions?" + new URLSearchParams({
+            limit: "10",
+            difficulties: level
+        }))
+        .then(response => {
+            return response.json()
+        })
+        .then(data => {
+            questions = data;
+            showQuestion();
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
 
     function showQuestion() {
         resetState();
         let currentQuestion = questions[currentQuestionIndex];
         let questionNumber = currentQuestionIndex + 1;
-        $questionElement.text(`${questionNumber}. ${currentQuestion.question}`);
-        currentQuestion.answers.forEach(answer => {
+        $questionElement.text(`${questionNumber}. ${currentQuestion.question.text}`);
+        currentQuestion.incorrectAnswers.forEach(incorrectAnswer => {
             const $button = $("<button></button>")
-                .text(answer.text)
+                .text(incorrectAnswer)
                 .addClass("btn")
-                .data("correct", answer.correct);
-            $button.on("click", function () {
+                .data("correct", false);
+            $button.on("click", function() {
                 selectAnswer($(this))
             });
             $answerButtons.append($button);
         });
+        const $button = $("<button></button>")
+            .text(currentQuestion.correctAnswer)
+            .addClass("btn")
+            .data("correct", true);
+        $button.on("click", () => {
+            selectAnswer($(this))
+        });
+        $answerButtons.append($button);
+        $answerButtons.children().sort(function() {
+            return Math.random() - 0.5;
+        }).detach().appendTo($answerButtons);
     };
 
     function resetState() {
@@ -88,7 +100,7 @@ $(document).ready(() => {
         $questionElement.html(`You scored ${score} out of ${questions.length}!`);
         $nextButton.html("Play Again");
         $nextButton.css("display", "block");
-    }
+    };
 
     function handleNextButton() {
         currentQuestionIndex++;
@@ -97,15 +109,18 @@ $(document).ready(() => {
         } else {
             showScore();
         }
-    }
+    };
+
+    function showSelectLevel() {
+        $quizDiv.hide();
+        $selectLevel.css("display", "block");
+    };
 
     $nextButton.on("click", () => {
         if(currentQuestionIndex < questions.length) {
             handleNextButton();
         } else {
-            startQuiz();
+            showSelectLevel();
         }
-    })
-
-    startQuiz();
+    });
 });

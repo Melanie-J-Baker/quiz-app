@@ -24,10 +24,17 @@ body {
     font-weight: 600;
     border-bottom: 1px solid #02302c;
     padding-bottom: 30px;
+    text-align: center;
+}
+
+.select-level {
+    padding: 20px 0;
+    text-align: center;
 }
 
 .quiz { 
     padding: 20px 0;
+    display: none;
 }
 
 .quiz h2 {
