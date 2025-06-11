@@ -12,7 +12,8 @@ $(document).ready(() => {
 
     levels.forEach(level => {
         const $levelButton = $("<button></button>")
-            .text(level)
+            // Capitalise first letter of level text
+            .text(level.charAt(0).toUpperCase() + level.slice(1))
             .addClass("level-btn btn")
         $levelButton.on("click", () => startQuiz(level))
         $selectLevel.append($levelButton);
@@ -63,10 +64,11 @@ $(document).ready(() => {
             .text(currentQuestion.correctAnswer)
             .addClass("btn")
             .data("correct", true);
-        $button.on("click", () => {
+        $button.on("click", function() {
             selectAnswer($(this))
         });
         $answerButtons.append($button);
+        // Shuffle answer buttons
         $answerButtons.children().sort(function() {
             return Math.random() - 0.5;
         }).detach().appendTo($answerButtons);
